@@ -1,6 +1,0 @@
-[package]
-name = "poe-alloc"
-version = "0.1.0"
-authors = ["Cameron Bytheway <bytheway.cameron@gmail.com>"]
-
-[dependencies]

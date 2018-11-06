@@ -4,6 +4,5 @@ version = "0.1.0"
 authors = ["Cameron Bytheway <bytheway.cameron@gmail.com>"]
 
 [dependencies]
-lazy_static = "1"
-log = "0.4"
-poe-alloc = { path = "./poe-alloc" }
+num-traits = "0.2"
+num-derive = "0.2"

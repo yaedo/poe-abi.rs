@@ -1,15 +1,18 @@
+#![feature(alloc)]
+#![no_std]
+extern crate alloc;
 #[macro_use]
-extern crate lazy_static;
-extern crate log as log_crate;
-extern crate poe_alloc;
+extern crate num_derive;
+extern crate num_traits;
 
-pub mod allocator {
-    pub use poe_alloc::PoeAlloc;
-    pub const POE_ALLOC: PoeAlloc = PoeAlloc {};
-}
+pub mod args;
 pub mod env;
-pub mod io;
+pub mod http;
 pub mod log;
-mod resource;
-
-pub use resource::Resource;
+pub mod math;
+pub mod proc;
+pub mod rand;
+pub mod request;
+pub mod response;
+pub mod time;
+pub mod types;

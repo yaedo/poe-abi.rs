@@ -1,10 +1,6 @@
-use resource::Resource;
+use types::StatusCode;
 
-lazy_static! {
-    static ref RESOURCE: Resource = Resource::open(b"log://").unwrap();
-}
-
-#[repr(u8)]
+#[repr(u32)]
 #[derive(Copy, Clone, Debug)]
 pub enum Level {
     Emergency = 0,
@@ -23,13 +19,18 @@ impl Default for Level {
     }
 }
 
-pub fn write(value: &[u8]) -> Option<()> {
-    write_with_level(Level::default(), value)
+mod raw {
+    #[link(wasm_import_module = "/poe/log")]
+    extern "C" {
+        #[link_name = "/poe/log/write__1"]
+        pub fn write(level: u32, memory_index: u32, memory_addr: *const u8, memory_len: u32)
+            -> u32;
+    }
 }
 
-pub fn write_with_level(level: Level, value: &[u8]) -> Option<()> {
-    match RESOURCE.write(&[&[level as u8], value].concat()) {
-        Ok(_) => Some(()),
-        Err(_) => None,
-    }
+#[inline]
+pub fn write(level: Level, data: &str) -> Result<(), StatusCode> {
+    let ptr = data.as_ptr();
+    let code: StatusCode = unsafe { raw::write(level as u32, 0, ptr, data.len() as u32) }.into();
+    code.into()
 }
