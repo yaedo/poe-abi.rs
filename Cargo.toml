@@ -1,8 +1,5 @@
-[package]
-name = "poe-abi"
-version = "0.1.0"
-authors = ["Cameron Bytheway <bytheway.cameron@gmail.com>"]
-
-[dependencies]
-num-traits = "0.2"
-num-derive = "0.2"
+[workspace]
+members = [
+    "wasp",
+    "wasp-*"
+]

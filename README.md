@@ -1,2 +1,3 @@
-# poe-abi.rs
-Rust ABI for the poe platform
+# wasp.rs
+
+Rust API for WASP

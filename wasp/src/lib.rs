@@ -1,5 +1,6 @@
-#![feature(alloc)]
+#![feature(alloc, extern_crate_item_prelude)]
 #![no_std]
+
 extern crate alloc;
 #[macro_use]
 extern crate num_derive;
@@ -10,7 +11,7 @@ pub mod env;
 pub mod http;
 pub mod log;
 pub mod math;
-pub mod proc;
+pub mod process;
 pub mod rand;
 pub mod request;
 pub mod response;

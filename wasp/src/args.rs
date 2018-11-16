@@ -1,27 +1,16 @@
 use alloc::vec::Vec;
-use types::read_vec;
-use types::StatusCode;
-
-mod raw {
-    use types::Result;
-    #[link(wasm_import_module = "/poe/args")]
-    extern "system" {
-        #[link_name = "/poe/args/len__1"]
-        pub fn len() -> u32;
-
-        #[link_name = "/poe/args/get__1"]
-        pub fn get(index: u32, mem_index: u32, mem_addr: *mut u8, mem_len: u32) -> Result;
-    }
-}
+use crate::types::read_vec;
+use crate::types::StatusCode;
+use wasp_abi::args;
 
 #[inline]
 pub fn len() -> u32 {
-    unsafe { raw::len() }
+    unsafe { args::len() }
 }
 
 pub fn get(index: u32) -> Result<Vec<u8>, StatusCode> {
     read_vec(32, |s, cap| unsafe {
-        raw::get(index, 0, s as *mut u8, cap as u32)
+        args::get(index, 0, s as *mut u8, cap as u32)
     })
 }
 

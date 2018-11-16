@@ -1,52 +1,12 @@
-use types::StatusCode;
-
-mod raw {
-    #[link(wasm_import_module = "/poe/time")]
-    extern "C" {
-        #[link_name = "/poe/time/monotonic_resolution__1"]
-        pub fn monotonic_resolution() -> u64;
-        #[link_name = "/poe/time/monotonic_now__1"]
-        pub fn monotonic_now(
-            precision_index: u32,
-            precision: *mut u64,
-            timestamp_index: u32,
-            timestamp_secs: *mut u64,
-            timestamp_sub_index: u32,
-            timestamp_subsecs: *mut u32,
-        ) -> u32;
-
-        #[link_name = "/poe/time/cpu_resolution__1"]
-        pub fn cpu_resolution() -> u64;
-        #[link_name = "/poe/time/cpu_now__1"]
-        pub fn cpu_now(
-            precision_index: u32,
-            precision: *mut u64,
-            timestamp_index: u32,
-            timestamp_secs: *mut u64,
-            timestamp_sub_index: u32,
-            timestamp_subsecs: *mut u32,
-        ) -> u32;
-
-        #[link_name = "/poe/time/os_resolution__1"]
-        pub fn os_resolution() -> u64;
-        #[link_name = "/poe/time/os_now__1"]
-        pub fn os_now(
-            precision_index: u32,
-            precision: *mut u64,
-            timestamp_index: u32,
-            timestamp_secs: *mut u64,
-            timestamp_sub_index: u32,
-            timestamp_subsecs: *mut u32,
-        ) -> u32;
-    }
-}
+use crate::types::StatusCode;
+use wasp_abi::time;
 
 pub mod monotonic {
     use super::*;
 
     #[inline]
     pub fn resolution() -> u64 {
-        unsafe { raw::monotonic_resolution() }
+        unsafe { time::monotonic_resolution() }
     }
 
     pub fn now() -> Result<(u64, u64, u32), StatusCode> {
@@ -54,7 +14,7 @@ pub mod monotonic {
         let mut timestamp_secs = 0;
         let mut timestamp_subsecs = 0;
         let res = unsafe {
-            raw::monotonic_now(
+            time::monotonic_now(
                 0,
                 &mut precision as *mut u64,
                 0,
@@ -75,7 +35,7 @@ pub mod cpu {
 
     #[inline]
     pub fn resolution() -> u64 {
-        unsafe { raw::cpu_resolution() }
+        unsafe { time::cpu_resolution() }
     }
 
     pub fn now() -> Result<(u64, u64, u32), StatusCode> {
@@ -83,7 +43,7 @@ pub mod cpu {
         let mut timestamp_secs = 0;
         let mut timestamp_subsecs = 0;
         let res = unsafe {
-            raw::cpu_now(
+            time::cpu_now(
                 0,
                 &mut precision as *mut u64,
                 0,
@@ -104,7 +64,7 @@ pub mod os {
 
     #[inline]
     pub fn resolution() -> u64 {
-        unsafe { raw::os_resolution() }
+        unsafe { time::os_resolution() }
     }
 
     #[inline]
@@ -113,7 +73,7 @@ pub mod os {
         let mut timestamp_secs = 0;
         let mut timestamp_subsecs = 0;
         let res = unsafe {
-            raw::os_now(
+            time::os_now(
                 0,
                 &mut precision as *mut u64,
                 0,
