@@ -27,13 +27,16 @@ pub fn end_head() -> Result<u32, StatusCode> {
     res.into()
 }
 
-pub fn write_body(data: &[u8]) -> Result<u32, StatusCode> {
-    let res: AbiResult =
-        unsafe { response::write_body(0, data.as_ptr(), data.len() as u32) }.into();
-    res.into()
+pub fn write_body(data: &[u8]) -> Result<usize, StatusCode> {
+    match unsafe { response::write_body(0, data.as_ptr(), data.len() as u32) }.into() {
+        AbiResult(StatusCode::SUCCESS, len) => Ok(len as usize),
+        AbiResult(code, _) => Err(code),
+    }
 }
 
-pub fn end_body() -> Result<u32, StatusCode> {
-    let res: AbiResult = unsafe { response::end_body() }.into();
-    res.into()
+pub fn end_body() -> Result<(), StatusCode> {
+    match unsafe { response::end_body() }.into() {
+        StatusCode::SUCCESS => Ok(()),
+        code => Err(code),
+    }
 }

@@ -59,11 +59,14 @@ pub mod http {
             value_len: u32,
         ) -> u32;
 
+        #[link_name = "/wasp/http/send_head__1"]
+        pub fn send_head(id: u32) -> u32;
+
         #[link_name = "/wasp/http/write_body__1"]
         pub fn write_body(id: u32, mem_index: u32, mem_addr: *const u8, mem_len: u32) -> u64;
 
-        #[link_name = "/wasp/http/send__1"]
-        pub fn send(id: u32) -> u32;
+        #[link_name = "/wasp/http/send_body__1"]
+        pub fn send_body(id: u32) -> u32;
 
         #[link_name = "/wasp/http/read_status_code__1"]
         pub fn read_status_code(id: u32) -> u64;
@@ -277,7 +280,7 @@ pub mod response {
         pub fn write_body(data_index: u32, data_addr: *const u8, data_len: u32) -> u64;
 
         #[link_name = "/wasp/response/end_body__1"]
-        pub fn end_body() -> u64;
+        pub fn end_body() -> u32;
     }
 }
 

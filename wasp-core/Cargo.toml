@@ -1,9 +1,10 @@
 [package]
-name = "wasp"
+name = "wasp-core"
 version = "0.1.0"
 authors = ["Cameron Bytheway <bytheway.cameron@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-wasp-core = { path = "../wasp-core" }
-wasp-http = { path = "../wasp-http" }
+num-traits = "0.2"
+num-derive = "0.2"
+wasp-abi = { path = "../wasp-abi" }
