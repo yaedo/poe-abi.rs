@@ -3,7 +3,7 @@ pub use http::{
     Request as HttpRequest, Response as HttpResponse, StatusCode, Uri,
 };
 use http::{HttpTryFrom, Request, Response};
-use std::io::{copy, Error as IOError, ErrorKind as IOErrorKind, Read, Write};
+use std::io::{copy, BufReader, Bytes, Error as IOError, ErrorKind as IOErrorKind, Read, Write};
 
 pub trait HttpMessage {
     type Response;
@@ -15,12 +15,59 @@ pub struct HttpRequestBody {
     _v: (),
 }
 
-impl Read for HttpRequestBody {
-    fn read(&mut self, bytes: &mut [u8]) -> Result<usize, IOError> {
-        wasp_core::request::read_body(bytes)
-            .map_err(|_| IOError::new(IOErrorKind::BrokenPipe, "Could not read body"))
-    }
+macro_rules! impl_read_body {
+    ($ty:ty, | $self:ident, $bytes:ident | $call:expr) => {
+        impl Read for $ty {
+            fn read(&mut $self, $bytes: &mut [u8]) -> Result<usize, IOError> {
+                $call.map_err(|_| IOError::new(IOErrorKind::BrokenPipe, "Could not read body"))
+            }
+        }
+
+        impl Into<String> for $ty {
+            fn into(self) -> String {
+                let res: Result<_, _> = self.into();
+                res.unwrap()
+            }
+        }
+
+        impl Into<Result<String, IOError>> for $ty {
+            fn into(mut self) -> Result<String, IOError> {
+                let mut string = Default::default();
+                self.read_to_string(&mut string)?;
+                Ok(string)
+            }
+        }
+
+        impl Into<Vec<u8>> for $ty {
+            fn into(self) -> Vec<u8> {
+                let res: Result<_, _> = self.into();
+                res.unwrap()
+            }
+        }
+
+        impl Into<Result<Vec<u8>, IOError>> for $ty {
+            fn into(mut self) -> Result<Vec<u8>, IOError> {
+                let mut bytes = vec![];
+                self.read_to_end(&mut bytes)?;
+                Ok(bytes)
+            }
+        }
+
+        impl IntoIterator for $ty {
+            type Item = Result<u8, IOError>;
+            type IntoIter = Bytes<BufReader<Self>>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                BufReader::new(self).bytes()
+            }
+        }
+    };
 }
+
+impl_read_body!(
+    HttpRequestBody,
+    |self, bytes| wasp_core::request::read_body(bytes)
+);
 
 pub fn read_request() -> Result<Request<HttpRequestBody>, IOError> {
     let mut request = Request::new(HttpRequestBody { _v: () });
@@ -63,21 +110,9 @@ pub struct HttpClientResponseBody {
     response: wasp_core::http::Request,
 }
 
-impl Read for HttpClientResponseBody {
-    fn read(&mut self, bytes: &mut [u8]) -> Result<usize, IOError> {
-        self.response
-            .read_body(bytes)
-            .map_err(|_| IOError::new(IOErrorKind::BrokenPipe, "Could not read body"))
-    }
-}
-
-impl Into<Vec<u8>> for HttpClientResponseBody {
-    fn into(mut self) -> Vec<u8> {
-        let mut bytes = vec![];
-        self.read_to_end(&mut bytes).unwrap();
-        bytes
-    }
-}
+impl_read_body!(HttpClientResponseBody, |self, bytes| self
+    .response
+    .read_body(bytes));
 
 impl HttpMessage for Request<()> {
     type Response = Result<Response<HttpClientResponseBody>, IOError>;
@@ -168,8 +203,7 @@ impl Write for ResponseBody {
     }
 
     fn flush(&mut self) -> Result<(), IOError> {
-        wasp_core::response::end_body()
-            .map_err(|_| IOError::new(IOErrorKind::BrokenPipe, "Could not write body"))
+        Ok(())
     }
 }
 
