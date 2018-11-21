@@ -79,41 +79,85 @@ impl Into<Vec<u8>> for HttpClientResponseBody {
     }
 }
 
-impl<B: Read> HttpMessage for Request<B> {
+impl HttpMessage for Request<()> {
     type Response = Result<Response<HttpClientResponseBody>, IOError>;
 
     fn send(self) -> Self::Response {
-        use wasp_core::http::Request;
-        let mut req = Request::open(self.method().as_str(), &format!("{}", self.uri())).unwrap();
-        for (name, value) in self.headers() {
-            req.write_header(name.as_str(), value.to_str().unwrap())
-                .unwrap();
-        }
-        req.send_head().unwrap();
-
-        copy(
-            &mut self.into_body(),
-            &mut HttpClientRequestBody { request: &mut req },
-        )?;
-        req.send_body().unwrap();
-
-        let status_code = req.read_status_code().unwrap();
-        let res_headers: Vec<_> = req.read_headers().unwrap().collect();
-        let mut response = Response::new(HttpClientResponseBody { response: req });
-
-        *response.status_mut() = HttpTryFrom::try_from(status_code as u16).unwrap();
-
-        let headers = response.headers_mut();
-        for (name, value) in res_headers {
-            headers.append::<HeaderName>(
-                HttpTryFrom::try_from(name.as_str()).unwrap(),
-                HttpTryFrom::try_from(value).unwrap(),
-            );
-        }
-
-        Ok(response)
+        let (head, _) = self.into_parts();
+        Request::from_parts(head, std::io::Cursor::new(vec![])).send()
     }
 }
+
+#[macro_export]
+macro_rules! impl_cursor_request {
+    ($ty:ty) => {
+        impl_cursor_request!($ty where);
+    };
+    ($ty:ty where $($params:tt)*) => {
+        impl<$($params)*> HttpMessage for Request<$ty> {
+            type Response = Result<Response<HttpClientResponseBody>, IOError>;
+
+            fn send(self) -> Self::Response {
+                let (head, body) = self.into_parts();
+                Request::from_parts(head, std::io::Cursor::new(body)).send()
+            }
+        }
+    }
+}
+
+impl_cursor_request!(String);
+impl_cursor_request!(&str);
+impl_cursor_request!(Vec<u8>);
+impl_cursor_request!(&[u8]);
+
+#[macro_export]
+macro_rules! impl_reader_request {
+    ($ty:ty) => {
+        impl_reader_request!($ty where );
+    };
+    ($ty:ty where $($params:tt)*) => {
+        impl<$($params)*> HttpMessage for Request<$ty> {
+            type Response = Result<Response<HttpClientResponseBody>, IOError>;
+
+            fn send(self) -> Self::Response {
+                use wasp_core::http::Request;
+                let mut req =
+                    Request::open(self.method().as_str(), &format!("{}", self.uri())).unwrap();
+                for (name, value) in self.headers() {
+                    req.write_header(name.as_str(), value.to_str().unwrap())
+                        .unwrap();
+                }
+                req.send_head().unwrap();
+
+                copy(
+                    &mut self.into_body(),
+                    &mut HttpClientRequestBody { request: &mut req },
+                )?;
+                req.send_body().unwrap();
+
+                let status_code = req.read_status_code().unwrap();
+                let res_headers: Vec<_> = req.read_headers().unwrap().collect();
+                let mut response = Response::new(HttpClientResponseBody { response: req });
+
+                *response.status_mut() = HttpTryFrom::try_from(status_code as u16).unwrap();
+
+                let headers = response.headers_mut();
+                for (name, value) in res_headers {
+                    headers.append::<HeaderName>(
+                        HttpTryFrom::try_from(name.as_str()).unwrap(),
+                        HttpTryFrom::try_from(value).unwrap(),
+                    );
+                }
+
+                Ok(response)
+            }
+        }
+    };
+}
+
+impl_reader_request!(std::io::Cursor<T> where T: AsRef<[u8]>);
+impl_reader_request!(HttpRequestBody);
+impl_reader_request!(HttpClientResponseBody);
 
 struct ResponseBody {}
 
