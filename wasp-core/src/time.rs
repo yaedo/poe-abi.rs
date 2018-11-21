@@ -13,7 +13,7 @@ pub mod monotonic {
         let mut precision = 0;
         let mut timestamp_secs = 0;
         let mut timestamp_subsecs = 0;
-        let res = unsafe {
+        let res: StatusCode = unsafe {
             time::monotonic_now(
                 0,
                 &mut precision as *mut u64,
@@ -22,11 +22,10 @@ pub mod monotonic {
                 0,
                 &mut timestamp_subsecs as *mut u32,
             )
-        };
-        match res.into() {
-            StatusCode::SUCCESS => Ok((precision, timestamp_secs, timestamp_subsecs)),
-            err => Err(err),
         }
+        .into();
+        let res: Result<_, _> = res.into();
+        res.map(|_: ()| (precision, timestamp_secs, timestamp_subsecs))
     }
 }
 
@@ -42,7 +41,7 @@ pub mod cpu {
         let mut precision = 0;
         let mut timestamp_secs = 0;
         let mut timestamp_subsecs = 0;
-        let res = unsafe {
+        let res: StatusCode = unsafe {
             time::cpu_now(
                 0,
                 &mut precision as *mut u64,
@@ -51,11 +50,10 @@ pub mod cpu {
                 0,
                 &mut timestamp_subsecs as *mut u32,
             )
-        };
-        match res.into() {
-            StatusCode::SUCCESS => Ok((precision, timestamp_secs, timestamp_subsecs)),
-            err => Err(err),
         }
+        .into();
+        let res: Result<_, _> = res.into();
+        res.map(|_: ()| (precision, timestamp_secs, timestamp_subsecs))
     }
 }
 
@@ -72,7 +70,7 @@ pub mod os {
         let mut precision = 0;
         let mut timestamp_secs = 0;
         let mut timestamp_subsecs = 0;
-        let res = unsafe {
+        let res: StatusCode = unsafe {
             time::os_now(
                 0,
                 &mut precision as *mut u64,
@@ -81,10 +79,9 @@ pub mod os {
                 0,
                 &mut timestamp_subsecs as *mut u32,
             )
-        };
-        match res.into() {
-            StatusCode::SUCCESS => Ok((precision, timestamp_secs, timestamp_subsecs)),
-            err => Err(err),
         }
+        .into();
+        let res: Result<_, _> = res.into();
+        res.map(|_: ()| (precision, timestamp_secs, timestamp_subsecs))
     }
 }

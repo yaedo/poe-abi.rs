@@ -1,2 +1,2 @@
 pub use wasp_core::*;
-pub use wasp_http::*;
+pub use wasp_http as http;

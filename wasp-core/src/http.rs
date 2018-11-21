@@ -29,8 +29,8 @@ impl Request {
         res.map(Request)
     }
 
-    pub fn write_header(&mut self, name: &str, value: &str) -> Result<(), StatusCode> {
-        let res: StatusCode = unsafe {
+    pub fn write_header(&mut self, name: &str, value: &str) -> Result<usize, StatusCode> {
+        let res: AbiResult = unsafe {
             http::write_header(
                 self.0,
                 0,
@@ -42,8 +42,8 @@ impl Request {
             )
         }
         .into();
-
-        res.into()
+        let res: Result<_, _> = res.into();
+        res.map(|len| len as usize)
     }
 
     pub fn send_head(&mut self) -> Result<(), StatusCode> {

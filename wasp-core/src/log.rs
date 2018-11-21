@@ -1,4 +1,4 @@
-use crate::types::StatusCode;
+use crate::types::{AbiResult, StatusCode};
 use wasp_abi::log;
 
 #[repr(u32)]
@@ -21,8 +21,9 @@ impl Default for Level {
 }
 
 #[inline]
-pub fn write(level: Level, data: &str) -> Result<(), StatusCode> {
+pub fn write(level: Level, data: &str) -> Result<usize, StatusCode> {
     let ptr = data.as_ptr();
-    let code: StatusCode = unsafe { log::write(level as u32, 0, ptr, data.len() as u32) }.into();
-    code.into()
+    let res: AbiResult = unsafe { log::write(level as u32, 0, ptr, data.len() as u32) }.into();
+    let res: Result<_, _> = res.into();
+    res.map(|len| len as usize)
 }

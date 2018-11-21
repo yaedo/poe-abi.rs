@@ -133,7 +133,7 @@ impl<B: Read> HttpMessage for Response<B> {
     type Response = Result<(), IOError>;
 
     fn send(self) -> Self::Response {
-        wasp_core::response::write_status_code(u32::from(self.status().as_u16())).unwrap();
+        wasp_core::response::write_status_code(self.status().as_u16()).unwrap();
 
         for (name, value) in self.headers() {
             wasp_core::response::write_header(name.as_str(), value.to_str().unwrap()).unwrap();

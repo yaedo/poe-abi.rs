@@ -57,7 +57,7 @@ pub mod http {
             value_index: u32,
             value_addr: *const u8,
             value_len: u32,
-        ) -> u32;
+        ) -> u64;
 
         #[link_name = "/wasp/http/send_head__1"]
         pub fn send_head(id: u32) -> u32;
@@ -116,7 +116,7 @@ pub mod log {
     extern "C" {
         #[link_name = "/wasp/log/write__1"]
         pub fn write(level: u32, memory_index: u32, memory_addr: *const u8, memory_len: u32)
-            -> u32;
+            -> u64;
     }
 }
 
@@ -271,10 +271,10 @@ pub mod response {
             value_index: u32,
             value_addr: *const u8,
             value_len: u32,
-        ) -> u32;
+        ) -> u64;
 
         #[link_name = "/wasp/response/end_head__1"]
-        pub fn end_head() -> u64;
+        pub fn end_head() -> u32;
 
         #[link_name = "/wasp/response/write_body__1"]
         pub fn write_body(data_index: u32, data_addr: *const u8, data_len: u32) -> u64;

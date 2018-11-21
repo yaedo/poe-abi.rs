@@ -83,8 +83,8 @@ impl Iterator for HeaderIterator {
 }
 
 pub fn read_body(out: &mut [u8]) -> Result<usize, StatusCode> {
-    match unsafe { request::read_body(0, out.as_mut_ptr(), out.len() as u32) }.into() {
-        AbiResult(StatusCode::SUCCESS, len) => Ok(len as usize),
-        AbiResult(code, _) => Err(code),
-    }
+    let res: AbiResult =
+        unsafe { request::read_body(0, out.as_mut_ptr(), out.len() as u32) }.into();
+    let res: Result<_, _> = res.into();
+    res.map(|len| len as usize)
 }
