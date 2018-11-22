@@ -10,6 +10,26 @@ pub trait HttpMessage {
     fn send(self) -> Self::Response;
 }
 
+pub trait HttpMapBody<Into>: Sized {
+    fn map_body(self) -> Into;
+}
+
+impl<Body: Into<Target>, Target> HttpMapBody<Request<Target>> for Request<Body> {
+    fn map_body(self) -> Request<Target> {
+        let (head, body) = self.into_parts();
+        let body = body.into();
+        Request::from_parts(head, body)
+    }
+}
+
+impl<Body: Into<Target>, Target> HttpMapBody<Response<Target>> for Response<Body> {
+    fn map_body(self) -> Response<Target> {
+        let (head, body) = self.into_parts();
+        let body = body.into();
+        Response::from_parts(head, body)
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct HttpRequestBody {
     _v: (),
@@ -207,22 +227,55 @@ impl Write for ResponseBody {
     }
 }
 
-impl<B: Read> HttpMessage for Response<B> {
-    type Response = Result<(), IOError>;
+#[macro_export]
+macro_rules! impl_cursor_response {
+    ($ty:ty) => {
+        impl_cursor_response!($ty where);
+    };
+    ($ty:ty where $($params:tt)*) => {
+        impl<$($params)*> HttpMessage for Response<$ty> {
+            type Response = Result<(), IOError>;
 
-    fn send(self) -> Self::Response {
-        wasp_core::response::write_status_code(self.status().as_u16()).unwrap();
-
-        for (name, value) in self.headers() {
-            wasp_core::response::write_header(name.as_str(), value.to_str().unwrap()).unwrap();
+            fn send(self) -> Self::Response {
+                let (head, body) = self.into_parts();
+                Response::from_parts(head, std::io::Cursor::new(body)).send()
+            }
         }
-
-        wasp_core::response::end_head().unwrap();
-
-        copy(&mut self.into_body(), &mut ResponseBody {})?;
-
-        wasp_core::response::end_body().unwrap();
-
-        Ok(())
     }
 }
+
+impl_cursor_response!(String);
+impl_cursor_response!(&str);
+impl_cursor_response!(Vec<u8>);
+impl_cursor_response!(&[u8]);
+
+macro_rules! impl_reader_response {
+    ($ty:ty) => {
+        impl_reader_response!($ty where );
+    };
+    ($ty:ty where $($params:tt)*) => {
+        impl<$($params)*> HttpMessage for Response<$ty> {
+            type Response = Result<(), IOError>;
+
+            fn send(self) -> Self::Response {
+                wasp_core::response::write_status_code(self.status().as_u16()).unwrap();
+
+                for (name, value) in self.headers() {
+                    wasp_core::response::write_header(name.as_str(), value.to_str().unwrap()).unwrap();
+                }
+
+                wasp_core::response::end_head().unwrap();
+
+                copy(&mut self.into_body(), &mut ResponseBody {})?;
+
+                wasp_core::response::end_body().unwrap();
+
+                Ok(())
+            }
+        }
+    }
+}
+
+impl_reader_response!(std::io::Cursor<T> where T: AsRef<[u8]>);
+impl_reader_response!(HttpRequestBody);
+impl_reader_response!(HttpClientResponseBody);
