@@ -21,7 +21,8 @@ impl Default for Level {
 }
 
 #[inline]
-pub fn write(level: Level, data: &str) -> Result<usize, StatusCode> {
+pub fn write<Data: AsRef<str>>(level: Level, data: Data) -> Result<usize, StatusCode> {
+    let data = data.as_ref();
     let ptr = data.as_ptr();
     let res: AbiResult = unsafe { log::write(level as u32, 0, ptr, data.len() as u32) }.into();
     let res: Result<_, _> = res.into();

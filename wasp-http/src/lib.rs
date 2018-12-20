@@ -1,8 +1,8 @@
 pub use http::{
     header::{HeaderName, HeaderValue},
-    Request as HttpRequest, Response as HttpResponse, StatusCode, Uri,
+    HttpTryFrom, Request as HttpRequest, Response as HttpResponse, StatusCode, Uri,
 };
-use http::{HttpTryFrom, Request, Response};
+use http::{Request, Response};
 use std::io::{copy, BufReader, Bytes, Error as IOError, ErrorKind as IOErrorKind, Read, Write};
 
 pub trait HttpMessage {
@@ -110,6 +110,7 @@ pub fn read_request() -> Result<Request<HttpRequestBody>, IOError> {
     Ok(request)
 }
 
+#[derive(Debug)]
 struct HttpClientRequestBody<'a> {
     request: &'a mut wasp_core::http::Request,
 }
@@ -126,6 +127,7 @@ impl<'a> Write for HttpClientRequestBody<'a> {
     }
 }
 
+#[derive(Debug)]
 pub struct HttpClientResponseBody {
     response: wasp_core::http::Request,
 }
@@ -214,6 +216,7 @@ impl_reader_request!(std::io::Cursor<T> where T: AsRef<[u8]>);
 impl_reader_request!(HttpRequestBody);
 impl_reader_request!(HttpClientResponseBody);
 
+#[derive(Debug)]
 struct ResponseBody {}
 
 impl Write for ResponseBody {
@@ -245,8 +248,10 @@ macro_rules! impl_cursor_response {
 }
 
 impl_cursor_response!(String);
+impl_cursor_response!(&String);
 impl_cursor_response!(&str);
 impl_cursor_response!(Vec<u8>);
+impl_cursor_response!(&Vec<u8>);
 impl_cursor_response!(&[u8]);
 
 macro_rules! impl_reader_response {
