@@ -6,6 +6,10 @@ pub fn set_panic_hook() {
         use wasp_core::log::{write, Level};
         use wasp_http::{HttpMessage, HttpResponse, StatusCode};
         let payload = info.payload();
+        let location = info
+            .location()
+            .map(|location| format!("[{}:{}] ", location.file(), location.line()))
+            .unwrap_or_else(|| "".to_owned());
 
         fn send_error<Body>(status: StatusCode, body: Body)
         where
@@ -31,11 +35,11 @@ pub fn set_panic_hook() {
         }
 
         if let Some(err) = payload.downcast_ref::<&str>() {
-            write(Level::Error, err).unwrap();
+            write(Level::Error, format!("{}{}", location, err)).unwrap();
             return;
         }
 
-        write(Level::Error, "Request panicked").unwrap();
+        write(Level::Error, format!("{}Request panicked", location)).unwrap();
     }));
 }
 
