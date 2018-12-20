@@ -33,6 +33,17 @@ impl<T, E: std::fmt::Debug> WaspAssert<T> for Result<T, E> {
     }
 }
 
+pub trait WaspInspect {
+    fn inspect(self) -> Self;
+}
+
+impl<T: std::fmt::Debug> WaspInspect for T {
+    fn inspect(self) -> Self {
+        dev::inspect(&self);
+        self
+    }
+}
+
 pub mod dev {
     pub fn inspect<T: std::fmt::Debug>(data: T) {
         wasp_core::log::write(wasp_core::log::Level::Debug, &format!("{:?}", data)).unwrap();
