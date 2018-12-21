@@ -39,6 +39,11 @@ pub fn set_panic_hook() {
             return;
         }
 
+        if let Some(err) = payload.downcast_ref::<String>() {
+            write(Level::Error, format!("{}{}", location, err)).unwrap();
+            return;
+        }
+
         write(Level::Error, format!("{}Request panicked", location)).unwrap();
     }));
 }

@@ -46,7 +46,7 @@ macro_rules! impl_read_body {
         impl Into<String> for $ty {
             fn into(self) -> String {
                 let res: Result<_, _> = self.into();
-                res.unwrap()
+                res.expect("Could not convert body")
             }
         }
 
@@ -61,7 +61,7 @@ macro_rules! impl_read_body {
         impl Into<Vec<u8>> for $ty {
             fn into(self) -> Vec<u8> {
                 let res: Result<_, _> = self.into();
-                res.unwrap()
+                res.expect("Could not convert body")
             }
         }
 
@@ -163,8 +163,10 @@ macro_rules! impl_cursor_request {
 }
 
 impl_cursor_request!(String);
+impl_cursor_request!(&String);
 impl_cursor_request!(&str);
 impl_cursor_request!(Vec<u8>);
+impl_cursor_request!(&Vec<u8>);
 impl_cursor_request!(&[u8]);
 
 #[macro_export]
