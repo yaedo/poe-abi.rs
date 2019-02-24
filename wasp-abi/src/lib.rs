@@ -201,6 +201,8 @@ pub mod process {
 pub mod rand {
     #[link(wasm_import_module = "/wasp/rand")]
     extern "C" {
+        #[link_name = "/wasp/rand/read__1"]
+        pub fn read(mem_index: u32, mem_addr: *mut u8, mem_len: u32) -> u64;
         #[link_name = "/wasp/rand/u32__1"]
         pub fn u32() -> u32;
         #[link_name = "/wasp/rand/u64__1"]

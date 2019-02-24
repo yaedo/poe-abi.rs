@@ -1,4 +1,4 @@
-#![feature(alloc, extern_crate_item_prelude)]
+#![feature(alloc)]
 #![no_std]
 
 extern crate alloc;
