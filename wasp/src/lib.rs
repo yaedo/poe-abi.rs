@@ -64,3 +64,14 @@ pub mod dev {
         wasp_core::log::write(wasp_core::log::Level::Debug, format!("{:?}", data)).unwrap();
     }
 }
+
+pub mod time {
+    use std::time::{Duration, SystemTime, UNIX_EPOCH};
+    pub use wasp_core::time::*;
+
+    pub fn system_time() -> SystemTime {
+        let (_, secs, nanos) =
+            wasp_core::time::os::now().expect("Could not fetch current system time");
+        UNIX_EPOCH + Duration::new(secs, nanos)
+    }
+}
