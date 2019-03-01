@@ -35,16 +35,16 @@ pub fn set_panic_hook() {
         }
 
         if let Some(err) = payload.downcast_ref::<&str>() {
-            write(Level::Error, format!("{}{}", location, err)).unwrap();
+            let _ = write(Level::Error, format!("{}{}", location, err));
             return;
         }
 
         if let Some(err) = payload.downcast_ref::<String>() {
-            write(Level::Error, format!("{}{}", location, err)).unwrap();
+            let _ = write(Level::Error, format!("{}{}", location, err));
             return;
         }
 
-        write(Level::Error, format!("{}Request panicked", location)).unwrap();
+        let _ = write(Level::Error, format!("{}Request panicked", location));
     }));
 }
 
@@ -64,6 +64,8 @@ pub mod dev {
         wasp_core::log::write(wasp_core::log::Level::Debug, format!("{:?}", data)).unwrap();
     }
 }
+
+pub mod cdn;
 
 pub mod time {
     use std::time::{Duration, SystemTime, UNIX_EPOCH};

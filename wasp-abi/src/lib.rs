@@ -11,6 +11,29 @@ pub mod args {
     }
 }
 
+pub mod cdn {
+    #[link(wasm_import_module = "/wasp/cdn")]
+    extern "system" {
+        #[link_name = "/wasp/cdn/read_static_url__1"]
+        pub fn read_static_url(mem_index: u32, mem_addr: *mut u8, mem_len: u32) -> u64;
+
+        #[link_name = "/wasp/cdn/sign_protected_object__1"]
+        pub fn sign_protected_object(
+            path_index: u32,
+            path_addr: *const u8,
+            path_len: u32,
+            expires_at: u64,
+            valid_at: u64,
+            ip_address_index: u32,
+            ip_address_addr: *const u8,
+            ip_address_len: u32,
+            out_index: u32,
+            out_addr: *mut u8,
+            out_len: u32,
+        ) -> u64;
+    }
+}
+
 pub mod env {
     #[link(wasm_import_module = "/wasp/env")]
     extern "system" {

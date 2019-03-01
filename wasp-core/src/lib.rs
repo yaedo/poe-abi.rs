@@ -7,6 +7,7 @@ extern crate num_derive;
 extern crate num_traits;
 
 pub mod args;
+pub mod cdn;
 pub mod env;
 pub mod http;
 pub mod log;
