@@ -66,6 +66,7 @@ pub mod dev {
 }
 
 pub mod cdn;
+pub mod kvs;
 
 pub mod time {
     use std::time::{Duration, SystemTime, UNIX_EPOCH};

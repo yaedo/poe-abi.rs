@@ -10,6 +10,7 @@ pub mod args;
 pub mod cdn;
 pub mod env;
 pub mod http;
+pub mod kvs;
 pub mod log;
 pub mod math;
 pub mod process;

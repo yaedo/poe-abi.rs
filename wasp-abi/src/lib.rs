@@ -134,6 +134,81 @@ pub mod http {
     }
 }
 
+pub mod kvs {
+    #[link(wasm_import_module = "/wasp/kvs")]
+    extern "C" {
+        #[link_name = "/wasp/kvs/get_open__1"]
+        pub fn get_open(key_index: u32, key_addr: *const u8, key_len: u32) -> u64;
+
+        #[link_name = "/wasp/kvs/get_read__1"]
+        pub fn get_read(id: u32, memory_index: u32, memory_addr: *mut u8, memory_len: u32) -> u64;
+
+        #[link_name = "/wasp/kvs/get_close__1"]
+        pub fn get_close(id: u32) -> u32;
+
+        #[link_name = "/wasp/kvs/list_open__1"]
+        pub fn list_open(key_index: u32, key_addr: *const u8, key_len: u32) -> u64;
+
+        #[link_name = "/wasp/kvs/list_read__1"]
+        pub fn list_read(id: u32, memory_index: u32, memory_addr: *mut u8, memory_len: u32) -> u64;
+
+        #[link_name = "/wasp/kvs/list_close__1"]
+        pub fn list_close(id: u32) -> u32;
+
+        #[link_name = "/wasp/kvs/put_open__1"]
+        pub fn put_open(
+            key_index: u32,
+            key_addr: *const u8,
+            key_len: u32,
+            content_length: u32,
+            cache_control: u32,
+        ) -> u64;
+
+        #[link_name = "/wasp/kvs/put_new_open__1"]
+        pub fn put_new_open(
+            key_index: u32,
+            key_addr: *const u8,
+            key_len: u32,
+            content_length: u32,
+            cache_control: u32,
+        ) -> u64;
+
+        #[link_name = "/wasp/kvs/put_write__1"]
+        pub fn put_write(
+            id: u32,
+            memory_index: u32,
+            memory_addr: *const u8,
+            memory_len: u32,
+        ) -> u64;
+
+        #[link_name = "/wasp/kvs/put_close__1"]
+        pub fn put_close(id: u32) -> u32;
+
+        #[link_name = "/wasp/kvs/delete__1"]
+        pub fn delete(key_index: u32, key_addr: *const u8, key_len: u32) -> u32;
+
+        #[link_name = "/wasp/kvs/copy__1"]
+        pub fn copy(
+            from_index: u32,
+            from_addr: *const u8,
+            from_len: u32,
+            to_index: u32,
+            to_addr: *const u8,
+            to_len: u32,
+        ) -> u32;
+
+        #[link_name = "/wasp/kvs/rename__1"]
+        pub fn rename(
+            from_index: u32,
+            from_addr: *const u8,
+            from_len: u32,
+            to_index: u32,
+            to_addr: *const u8,
+            to_len: u32,
+        ) -> u32;
+    }
+}
+
 pub mod log {
     #[link(wasm_import_module = "/wasp/log")]
     extern "C" {
