@@ -6,4 +6,4 @@ edition = "2018"
 
 [dependencies]
 wasp-abi = { path = "../wasp-abi" }
-wasp-status-code = { path = "../wasp-status-code", features = ["no_std"] }
+wasp-status-code = { path = "../wasp-status-code", default-features = false }

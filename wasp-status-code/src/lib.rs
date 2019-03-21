@@ -1,5 +1,5 @@
+#![cfg_attr(not(feature = "std"), no_std)]
 #![feature(try_trait)]
-#![cfg_attr(feature = "no_std", no_std)]
 
 use num_derive::{FromPrimitive, ToPrimitive};
 use num_traits::FromPrimitive;
@@ -100,7 +100,7 @@ impl core::ops::Try for StatusCode {
 
 macro_rules! io_error {
     ($($name:ident,)*) => {
-        #[cfg(not(feature = "no_std"))]
+        #[cfg(feature = "std")]
         impl From<std::io::ErrorKind> for StatusCode {
             fn from(kind: std::io::ErrorKind) -> Self {
                 match kind {
@@ -110,14 +110,14 @@ macro_rules! io_error {
             }
         }
 
-        #[cfg(not(feature = "no_std"))]
+        #[cfg(feature = "std")]
         impl From<std::io::Error> for StatusCode {
             fn from(error: std::io::Error) -> Self {
                 error.kind().into()
             }
         }
 
-        #[cfg(not(feature = "no_std"))]
+        #[cfg(feature = "std")]
         impl Into<std::io::ErrorKind> for StatusCode {
             fn into(self) -> std::io::ErrorKind {
                 match self {
@@ -127,7 +127,7 @@ macro_rules! io_error {
             }
         }
 
-        #[cfg(not(feature = "no_std"))]
+        #[cfg(feature = "std")]
         impl Into<std::io::Error> for StatusCode {
             fn into(self) -> std::io::Error {
                 std::io::Error::new(self.into(), "")
