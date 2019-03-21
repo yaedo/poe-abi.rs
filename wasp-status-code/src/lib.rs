@@ -1,3 +1,4 @@
+#![feature(try_trait)]
 #![cfg_attr(feature = "no_std", no_std)]
 
 use num_derive::{FromPrimitive, ToPrimitive};
@@ -77,29 +78,80 @@ impl Into<::core::result::Result<(), StatusCode>> for StatusCode {
     }
 }
 
-#[cfg(not(feature = "no_std"))]
-impl From<std::io::ErrorKind> for StatusCode {
-    fn from(kind: std::io::ErrorKind) -> Self {
-        use std::io::ErrorKind::*;
-        match kind {
-            NotFound => StatusCode::NotFound,
-            PermissionDenied => StatusCode::PermissionDenied,
-            ConnectionRefused => StatusCode::ConnectionRefused,
-            ConnectionReset => StatusCode::ConnectionReset,
-            ConnectionAborted => StatusCode::ConnectionAborted,
-            NotConnected => StatusCode::NotConnected,
-            AddrInUse => StatusCode::AddrInUse,
-            AddrNotAvailable => StatusCode::AddrNotAvailable,
-            BrokenPipe => StatusCode::BrokenPipe,
-            AlreadyExists => StatusCode::AlreadyExists,
-            WouldBlock => StatusCode::WouldBlock,
-            InvalidInput => StatusCode::InvalidInput,
-            InvalidData => StatusCode::InvalidData,
-            TimedOut => StatusCode::TimedOut,
-            WriteZero => StatusCode::WriteZero,
-            Interrupted => StatusCode::Interrupted,
-            UnexpectedEof => StatusCode::UnexpectedEof,
-            _ => StatusCode::Other,
+impl core::ops::Try for StatusCode {
+    type Error = Self;
+    type Ok = Self;
+
+    fn into_result(self) -> Result<Self::Ok, Self::Error> {
+        match self {
+            StatusCode::Success => Ok(self),
+            _ => Err(self),
+        }
+    }
+
+    fn from_error(v: Self::Error) -> Self {
+        v
+    }
+
+    fn from_ok(v: Self::Error) -> Self {
+        v
+    }
+}
+
+macro_rules! io_error {
+    ($($name:ident,)*) => {
+        #[cfg(not(feature = "no_std"))]
+        impl From<std::io::ErrorKind> for StatusCode {
+            fn from(kind: std::io::ErrorKind) -> Self {
+                match kind {
+                    $(std::io::ErrorKind::$name => StatusCode::$name,)*
+                    _ => StatusCode::Other,
+                }
+            }
+        }
+
+        #[cfg(not(feature = "no_std"))]
+        impl From<std::io::Error> for StatusCode {
+            fn from(error: std::io::Error) -> Self {
+                error.kind().into()
+            }
+        }
+
+        #[cfg(not(feature = "no_std"))]
+        impl Into<std::io::ErrorKind> for StatusCode {
+            fn into(self) -> std::io::ErrorKind {
+                match self {
+                    $(StatusCode::$name => std::io::ErrorKind::$name,)*
+                    _ => std::io::ErrorKind::Other,
+                }
+            }
+        }
+
+        #[cfg(not(feature = "no_std"))]
+        impl Into<std::io::Error> for StatusCode {
+            fn into(self) -> std::io::Error {
+                std::io::Error::new(self.into(), "")
+            }
         }
     }
 }
+
+io_error!(
+    NotFound,
+    PermissionDenied,
+    ConnectionRefused,
+    ConnectionReset,
+    ConnectionAborted,
+    NotConnected,
+    AddrInUse,
+    AddrNotAvailable,
+    BrokenPipe,
+    AlreadyExists,
+    WouldBlock,
+    InvalidInput,
+    InvalidData,
+    TimedOut,
+    WriteZero,
+    Interrupted,
+    UnexpectedEof,
+);
