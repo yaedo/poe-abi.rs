@@ -44,11 +44,27 @@ pub enum StatusCode {
     InvalidIndirectSignature = 35,
 }
 
-impl From<u32> for StatusCode {
-    fn from(value: u32) -> Self {
-        FromPrimitive::from_u32(value as u32).unwrap_or(StatusCode::Other)
-    }
+macro_rules! conv {
+    ($ty:ident, $call:ident) => {
+        impl From<$ty> for StatusCode {
+            fn from(value: $ty) -> Self {
+                FromPrimitive::$call(value).unwrap_or(StatusCode::Other)
+            }
+        }
+
+        impl Into<$ty> for StatusCode {
+            fn into(self) -> $ty {
+                self as $ty
+            }
+        }
+    };
 }
+
+conv!(u8, from_u8);
+conv!(u16, from_u16);
+conv!(u32, from_u32);
+conv!(u64, from_u64);
+conv!(usize, from_usize);
 
 impl Into<::core::result::Result<(), StatusCode>> for StatusCode {
     fn into(self) -> ::core::result::Result<(), StatusCode> {
