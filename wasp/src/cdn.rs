@@ -17,14 +17,6 @@ pub struct ProtectedObject {
 }
 
 impl ProtectedObject {
-    pub fn new(path: String, expires_at: SystemTime) -> Self {
-        Self {
-            path,
-            expires_at,
-            ..Default::default()
-        }
-    }
-
     pub fn sign(&self) -> Result<String, Error> {
         sign_protected_object(
             &self.path,
@@ -34,8 +26,15 @@ impl ProtectedObject {
                 None => 0,
             },
             self.ip_address.as_ref().map(String::as_str),
-        )
-        .map_err(|err| format_err!("{:?}", err))
+        ).map_err(|err| format_err!("{:?}", err))
+    }
+
+    pub fn new(path: String, expires_at: SystemTime) -> Self {
+        Self {
+            path,
+            expires_at,
+            ..Default::default()
+        }
     }
 }
 

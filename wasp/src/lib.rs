@@ -6,8 +6,7 @@ pub fn set_panic_hook() {
         use wasp_core::log::{write, Level};
         use wasp_http::{HttpMessage, HttpResponse, StatusCode};
         let payload = info.payload();
-        let location = info
-            .location()
+        let location = info.location()
             .map(|location| format!("[{}:{}] ", location.file(), location.line()))
             .unwrap_or_else(|| "".to_owned());
 

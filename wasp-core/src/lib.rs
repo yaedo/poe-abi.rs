@@ -2,9 +2,6 @@
 #![no_std]
 
 extern crate alloc;
-#[macro_use]
-extern crate num_derive;
-extern crate num_traits;
 
 pub mod args;
 pub mod cdn;

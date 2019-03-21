@@ -53,26 +53,26 @@ pub fn put_new(key: &str, content_length: u32, cache_control: u32) -> Result<Put
 }
 
 impl Put {
-    pub fn open(key: &str, content_length: u32, cache_control: u32) -> Result<Self, IOError> {
-        kvs::put(key, content_length, cache_control)
+    pub fn open_new(key: &str, content_length: u32, cache_control: u32) -> Result<Self, IOError> {
+        kvs::put_new(key, content_length, cache_control)
             .map(Put)
             .map_err(map_status_code)
     }
 
-    pub fn open_new(key: &str, content_length: u32, cache_control: u32) -> Result<Self, IOError> {
-        kvs::put_new(key, content_length, cache_control)
+    pub fn open(key: &str, content_length: u32, cache_control: u32) -> Result<Self, IOError> {
+        kvs::put(key, content_length, cache_control)
             .map(Put)
             .map_err(map_status_code)
     }
 }
 
 impl Write for Put {
-    fn write(&mut self, data: &[u8]) -> Result<usize, IOError> {
-        self.0.write(data).map_err(map_status_code)
-    }
-
     fn flush(&mut self) -> Result<(), IOError> {
         Ok(())
+    }
+
+    fn write(&mut self, data: &[u8]) -> Result<usize, IOError> {
+        self.0.write(data).map_err(map_status_code)
     }
 }
 
