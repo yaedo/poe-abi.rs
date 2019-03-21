@@ -1,4 +1,4 @@
-#![no_std]
+#![cfg_attr(feature = "no_std", no_std)]
 
 use num_derive::{FromPrimitive, ToPrimitive};
 use num_traits::FromPrimitive;
@@ -73,6 +73,33 @@ impl Into<::core::result::Result<(), StatusCode>> for StatusCode {
         match self {
             StatusCode::Success => Ok(()),
             _ => Err(self),
+        }
+    }
+}
+
+#[cfg(not(feature = "no_std"))]
+impl From<std::io::ErrorKind> for StatusCode {
+    fn from(kind: std::io::ErrorKind) -> Self {
+        use std::io::ErrorKind::*;
+        match kind {
+            NotFound => StatusCode::NotFound,
+            PermissionDenied => StatusCode::PermissionDenied,
+            ConnectionRefused => StatusCode::ConnectionRefused,
+            ConnectionReset => StatusCode::ConnectionReset,
+            ConnectionAborted => StatusCode::ConnectionAborted,
+            NotConnected => StatusCode::NotConnected,
+            AddrInUse => StatusCode::AddrInUse,
+            AddrNotAvailable => StatusCode::AddrNotAvailable,
+            BrokenPipe => StatusCode::BrokenPipe,
+            AlreadyExists => StatusCode::AlreadyExists,
+            WouldBlock => StatusCode::WouldBlock,
+            InvalidInput => StatusCode::InvalidInput,
+            InvalidData => StatusCode::InvalidData,
+            TimedOut => StatusCode::TimedOut,
+            WriteZero => StatusCode::WriteZero,
+            Interrupted => StatusCode::Interrupted,
+            UnexpectedEof => StatusCode::UnexpectedEof,
+            _ => StatusCode::Other,
         }
     }
 }
